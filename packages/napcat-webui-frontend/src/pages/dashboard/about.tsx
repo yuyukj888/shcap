@@ -5,9 +5,11 @@ import { Image } from '@heroui/image';
 import { Spinner } from '@heroui/spinner';
 import { useRequest } from 'ahooks';
 import {
+  BsChatDotsFill,
   BsCodeSlash,
   BsCpu,
   BsGlobe,
+  BsGithub,
   BsPlugin,
 } from 'react-icons/bs';
 import { IoRocketSharp } from 'react-icons/io5';
@@ -125,6 +127,40 @@ export default function AboutPage () {
 
         {/* 右侧：信息与链接 */}
         <div className='space-y-6'>
+
+          <Card shadow='sm' className={cardStyle}>
+            <CardHeader className='pb-0 pt-4 px-4'>
+              <h2 className='text-lg font-bold flex items-center gap-2'>
+                <BsGlobe /> 快捷链接
+              </h2>
+            </CardHeader>
+            <CardBody className='py-4 gap-2'>
+              <a
+                className='flex items-center gap-3 rounded-medium px-3 py-2 hover:bg-default-100 transition-colors'
+                href='https://github.com/yuyukj888/shcap'
+                rel='noreferrer noopener'
+                target='_blank'
+              >
+                <BsGithub className='text-xl text-default-600' />
+                <div className='flex flex-col'>
+                  <span className='text-small font-medium'>GitHub 仓库</span>
+                  <span className='text-tiny text-default-400'>github.com/yuyukj888/shcap</span>
+                </div>
+              </a>
+              <a
+                className='flex items-center gap-3 rounded-medium px-3 py-2 hover:bg-default-100 transition-colors'
+                href='https://qm.qq.com/q/K6l1ifjGQG'
+                rel='noreferrer noopener'
+                target='_blank'
+              >
+                <BsChatDotsFill className='text-xl text-primary' />
+                <div className='flex flex-col'>
+                  <span className='text-small font-medium'>QQ 交流群</span>
+                  <span className='text-tiny text-default-400'>点击加入 QQ 群</span>
+                </div>
+              </a>
+            </CardBody>
+          </Card>
 
           <Card shadow='sm' className={cardStyle}>
             <CardHeader className='pb-0 pt-4 px-4'>
