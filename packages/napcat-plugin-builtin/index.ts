@@ -30,10 +30,10 @@ export let plugin_config_ui: PluginConfigSchema = [];
 
 const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
   logger = ctx.logger;
-  logger.info('NapCat 内置插件已初始化');
+  logger.info('SHCAP 内置插件已初始化');
   plugin_config_ui = ctx.NapCatConfig.combine(
-    ctx.NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to NapCat Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface with reactive fields.</p></div>'),
-    ctx.NapCatConfig.text('prefix', 'Command Prefix', '#napcat', 'The prefix to trigger the version info command'),
+    ctx.NapCatConfig.html('<div style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><h3>👋 Welcome to SHCAP Builtin Plugin</h3><p>This is a demonstration of the plugin configuration interface with reactive fields.</p></div>'),
+    ctx.NapCatConfig.text('prefix', 'Command Prefix', '#shcap', 'The prefix to trigger the version info command'),
     ctx.NapCatConfig.boolean('enableReply', 'Enable Reply', true, 'Switch to enable or disable the reply functionality'),
     // 代表监听 apiUrl 字段的变化
     ctx.NapCatConfig.text('apiUrl', 'API URL', '', 'Enter an API URL to load available endpoints', true),
@@ -84,7 +84,7 @@ const plugin_init: PluginModule['plugin_init'] = async (ctx) => {
     {
       path: '/readme.txt',
       contentType: 'text/plain',
-      content: `NapCat Builtin Plugin\n=====================\nThis is a demonstration of the staticOnMem feature.\nPlugin: ${ctx.pluginName}\nPath: ${ctx.pluginPath}`,
+      content: `SHCAP Builtin Plugin\n=====================\nThis is a demonstration of the staticOnMem feature.\nPlugin: ${ctx.pluginName}\nPath: ${ctx.pluginPath}`,
     },
   ]);
 
@@ -357,7 +357,7 @@ function formatUptime (ms: number): string {
 
 function formatVersionMessage (info: { appName: string; appVersion: string; protocolVersion: string; }) {
   const uptime = Date.now() - startTime;
-  return `NapCat 信息\n版本: ${info.appVersion}\n平台: ${process.platform}${process.arch === 'x64' ? ' (64-bit)' : ''}\n运行时间: ${formatUptime(uptime)}`;
+  return `SHCAP 信息\n版本: ${info.appVersion}\n平台: ${process.platform}${process.arch === 'x64' ? ' (64-bit)' : ''}\n运行时间: ${formatUptime(uptime)}`;
 }
 
 async function sendMessage (actions: ActionMap, event: OB11Message, message: string, adapter: string, config: NetworkAdapterConfig) {
