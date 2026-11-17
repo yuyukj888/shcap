@@ -5,7 +5,6 @@ import { Image } from '@heroui/image';
 import { Spinner } from '@heroui/spinner';
 import { useRequest } from 'ahooks';
 import {
-  BsChatDotsFill,
   BsCodeSlash,
   BsCpu,
   BsGlobe,
@@ -153,7 +152,16 @@ export default function AboutPage () {
                 rel='noreferrer noopener'
                 target='_blank'
               >
-                <BsChatDotsFill className='text-xl text-primary' />
+                <svg
+                  aria-hidden='true'
+                  className='shrink-0 text-primary'
+                  fill='currentColor'
+                  height='22'
+                  viewBox='0 0 24 24'
+                  width='22'
+                >
+                  <path d='M21.395 15.035a39.548 39.548 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.24c0 .274.013.804.014.836l-1.08 2.695a38.97 38.97 0 0 0-.802 2.264c-1.021 3.283-.314 4.654.222 4.812.448.132 1.389-.757 2.28-2.263.394.868.86 1.738 1.429 2.573-.684.293-1.31.71-1.706 1.187-.383.462-.53.985-.34 1.495.19.51.72.793 1.398.793.32 0 .67-.062 1.052-.19.658-.223 1.194-.6 1.687-1.108.443.087.897.134 1.362.134.465 0 .92-.047 1.363-.134.49.508 1.028.885 1.686 1.108.383.128.732.19 1.052.19.677 0 1.208-.283 1.397-.793.19-.51.043-1.033-.34-1.495-.396-.477-1.021-.894-1.705-1.187a15.27 15.27 0 0 0 1.428-2.573c.891 1.506 1.832 2.395 2.28 2.263.536-.158 1.243-1.529.222-4.812z' />
+                </svg>
                 <div className='flex flex-col'>
                   <span className='text-small font-medium'>QQ 交流群</span>
                   <span className='text-tiny text-default-400'>点击加入 QQ 群</span>
