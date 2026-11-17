@@ -18,6 +18,7 @@ import { terminalManager } from '@/napcat-webui-backend/src/terminal/terminal_ma
 import multer from 'multer';
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
+import { startMailWatchdog } from './src/helper/MailService';
 import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误捕获
 import { ILogWrapper } from 'napcat-common/src/log-interface';
 import { ISubscription } from 'napcat-common/src/subscription-interface';
@@ -145,6 +146,9 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // 存储启动时的初始token用于鉴权
   setInitialWebUiToken(config.token);
+
+  // 启动邮件告警看门狗（掉线 / 恢复提醒），不依赖是否打开过邮件配置页
+  startMailWatchdog();
 
   const [host, port, token] = await InitPort(config);
   webUiRuntimePort = port;

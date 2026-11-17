@@ -251,6 +251,7 @@ export async function sendMail (subject: string, html: string): Promise<MailSend
 let watchdogStarted = false;
 let lastFocusedOnline: boolean | null = null;
 let lastAlertAt = 0;
+let wasEverOnline = false;
 
 async function watchdogTick (): Promise<void> {
   const cfg = getMailConfig();
@@ -265,6 +266,13 @@ async function watchdogTick (): Promise<void> {
   const cooldown = Math.max(1, cfg.cooldownMinutes) * 60 * 1000;
   if (lastFocusedOnline === null) {
     lastFocusedOnline = online;
+    wasEverOnline = online;
+    return;
+  }
+  if (online && !wasEverOnline) {
+    // 启动后首次登录成功，不算「恢复上线」，只记状态
+    wasEverOnline = true;
+    lastFocusedOnline = true;
     return;
   }
   if (lastFocusedOnline !== online) {
@@ -288,6 +296,11 @@ async function watchdogTick (): Promise<void> {
 export function startMailWatchdog (): void {
   if (watchdogStarted) return;
   watchdogStarted = true;
+  console.log('[SHCAP] 邮件告警看门狗已启动（每 60 秒检测一次 QQ 在线状态）');
+  // 启动时先跑一次，建立初始在线状态，避免重启后误发「恢复上线」
+  setTimeout(() => {
+    void watchdogTick();
+  }, 10 * 1000);
   setInterval(() => {
     void watchdogTick();
   }, 60 * 1000);
