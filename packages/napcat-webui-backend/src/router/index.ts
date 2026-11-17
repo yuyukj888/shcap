@@ -20,6 +20,7 @@ import { ProcessRouter } from './Process';
 import { PluginRouter } from './Plugin';
 import { MirrorRouter } from './Mirror';
 import { NapCatConfigRouter } from './NapCatConfig';
+import { MailRouter } from './Mail';
 
 const router: Router = Router();
 
@@ -56,5 +57,7 @@ router.use('/Plugin', PluginRouter);
 router.use('/Mirror', MirrorRouter);
 // router:NapCat配置相关路由
 router.use('/NapCatConfig', NapCatConfigRouter);
+// router:邮件服务相关路由
+router.use('/Mail', MailRouter);
 
 export { router as ALLRouter };

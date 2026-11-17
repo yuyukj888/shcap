@@ -17,6 +17,7 @@ import WebUIConfigCard from './webui';
 import BackupConfigCard from './backup';
 import BypassConfigCard from './bypass';
 import CoreConfigCard from './core';
+import MailConfigCard from './mail';
 
 export interface ConfigPageProps {
   children?: React.ReactNode;
@@ -131,6 +132,11 @@ export default function ConfigPage () {
         <Tab title='反检测' key='bypass'>
           <ConfigPageItem>
             <BypassConfigCard />
+          </ConfigPageItem>
+        </Tab>
+        <Tab title='邮件通知' key='mail'>
+          <ConfigPageItem>
+            <MailConfigCard />
           </ConfigPageItem>
         </Tab>
       </Tabs>

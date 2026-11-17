@@ -9,7 +9,6 @@ import {
   LuTerminal,
   LuZap,
   LuPackage,
-  LuStore,
   LuPuzzle,
 } from 'react-icons/lu';
 
@@ -61,11 +60,6 @@ export const siteConfig = {
       label: '插件管理',
       icon: <LuPackage className='w-5 h-5' />,
       href: '/plugins',
-    },
-    {
-      label: '插件商店',
-      icon: <LuStore className='w-5 h-5' />,
-      href: '/plugin_store',
     },
     {
       label: '扩展页面',
