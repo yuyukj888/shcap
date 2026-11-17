@@ -249,7 +249,7 @@ export function parseAppidFromMajor (nodeMajor: string): string | undefined {
 // ============== GitHub Tags 获取 ==============
 // 使用 mirror 模块统一管理镜像
 // SHCAP：版本来源指向本项目仓库（可用环境变量覆盖），不再依赖上游 NapCat 仓库
-export const SHCAP_REPO_OWNER = process.env.SHCAP_REPO_OWNER || 'yuyuk888';
+export const SHCAP_REPO_OWNER = process.env.SHCAP_REPO_OWNER || 'yuyukj888';
 export const SHCAP_REPO_NAME = process.env.SHCAP_REPO_NAME || 'shcap';
 
 export async function getAllTags (mirror?: string): Promise<{ tags: string[], mirror: string; }> {

@@ -829,6 +829,43 @@ export async function getAllGitHubTags (owner: string, repo: string, mirror?: st
     // all failed
   }
 
+  // SHCAP：git refs 走不通时（如国内网络被墙），回退到 GitHub REST API 取 tags。
+  // API 域名在多数网络下可达，且公开仓库无需鉴权。
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/tags?per_page=100`;
+    const list = await PromiseTimer(
+      RequestUtil.HttpGetJson<Array<{ name?: string }>>(apiUrl, 'GET', undefined, {
+        'User-Agent': 'SHCAP',
+        Accept: 'application/vnd.github.v3+json',
+      }),
+      6000
+    );
+    if (Array.isArray(list)) {
+      const tags = list.map(t => t.name).filter((n): n is string => !!n);
+      if (tags.length > 0) {
+        tagsCache.set(cacheKey, { tags, mirror: 'https://api.github.com', timestamp: Date.now() });
+        return { tags, mirror: 'https://api.github.com' };
+      }
+    }
+  } catch {
+    // ignore, fall through
+  }
+
+  // SHCAP：再兜底一次常见 GitHub 加速镜像（服务器在国内时 github.com 直连会超时）
+  try {
+    const proxies = ['https://ghfast.top', 'https://gh-proxy.com', 'https://ghproxy.net'];
+    const raced = await Promise.race([
+      Promise.any(proxies.map(p => fetchFromUrl(buildMirrorUrl(baseUrl, p), p))),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 8000)),
+    ]);
+    if (raced && raced.tags.length > 0) {
+      tagsCache.set(cacheKey, { tags: raced.tags, mirror: raced.mirror, timestamp: Date.now() });
+      return raced;
+    }
+  } catch {
+    // all proxy attempts failed
+  }
+
   if (mirror) {
     throw new Error(`指定镜像 ${mirror} 获取 tags 失败`);
   }
