@@ -21,6 +21,7 @@ const OFFICIAL_PLUGIN_IDS = new Set<string>([
 /** 内置插件：随程序分发，不允许卸载/删除。 */
 const BUILTIN_PLUGIN_IDS = new Set<string>([
   'napcat-plugin-builtin',
+  'napcat-plugin-cleaner',
 ]);
 
 /** 是否为内置插件（不可卸载） */
