@@ -18,6 +18,16 @@ const OFFICIAL_PLUGIN_IDS = new Set<string>([
   'napcat-plugin-qce',
 ]);
 
+/** 内置插件：随程序分发，不允许卸载/删除。 */
+const BUILTIN_PLUGIN_IDS = new Set<string>([
+  'napcat-plugin-builtin',
+]);
+
+/** 是否为内置插件（不可卸载） */
+export function isBuiltinPlugin (pluginId: string): boolean {
+  return BUILTIN_PLUGIN_IDS.has(pluginId);
+}
+
 /**
  * 敏感词表：插件源码命中（黑灰产 / 支付发卡相关）即拒绝加载。
  * 仅作启发式威慑，混淆/编码可绕过，并非唯一防线。

@@ -118,6 +118,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
     status: string;
     hasConfig: boolean;
     hasPages: boolean;
+    builtin: boolean;
     homepage?: string;
     repository?: string;
     icon?: string;
@@ -158,6 +159,7 @@ export const GetPluginListHandler: RequestHandler = async (_req, res) => {
       status,
       hasConfig: !!(p.runtime.module?.plugin_config_schema || p.runtime.module?.plugin_config_ui),
       hasPages,
+      builtin: pluginManager.isBuiltinPlugin(p.id),
       homepage: p.packageJson?.homepage,
       repository: typeof p.packageJson?.repository === 'string'
         ? p.packageJson.repository
@@ -220,6 +222,10 @@ export const UninstallPluginHandler: RequestHandler = async (req, res) => {
   const pluginManager = getPluginManager();
   if (!pluginManager) {
     return sendError(res, 'Plugin Manager not found');
+  }
+
+  if (pluginManager.isBuiltinPlugin(id)) {
+    return sendError(res, '内置插件不可卸载');
   }
 
   try {

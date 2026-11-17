@@ -22,6 +22,8 @@ export interface PluginItem {
   hasConfig?: boolean;
   /** 是否有扩展页面 */
   hasPages?: boolean;
+  /** 是否为内置插件（不可卸载） */
+  builtin?: boolean;
   /** 主页链接 */
   homepage?: string;
   /** 仓库链接 */

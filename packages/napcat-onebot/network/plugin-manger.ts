@@ -7,7 +7,7 @@ import { OB11EmitEventContent, OB11NetworkReloadType } from '@/napcat-onebot/net
 import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { PluginConfig } from '@/napcat-onebot/config/config';
 import { NapCatConfig } from './plugin/config';
-import { PluginLoader } from './plugin/loader';
+import { PluginLoader, isBuiltinPlugin } from './plugin/loader';
 import {
   PluginEntry,
   PluginLogger,
@@ -354,9 +354,19 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> i
   }
 
   /**
+   * 是否为内置插件（不可卸载）
+   */
+  public isBuiltinPlugin (pluginId: string): boolean {
+    return isBuiltinPlugin(pluginId);
+  }
+
+  /**
    * 卸载并删除插件
    */
   public async uninstallPlugin (pluginId: string, cleanData: boolean = false): Promise<void> {
+    if (isBuiltinPlugin(pluginId)) {
+      throw new Error('内置插件不可卸载');
+    }
     const entry = this.plugins.get(pluginId);
     if (!entry) {
       throw new Error(`Plugin ${pluginId} not found`);

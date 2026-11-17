@@ -41,7 +41,7 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
   onConfig,
   hasConfig = false,
 }) => {
-  const { name, version, author, description, status, icon } = data;
+  const { name, version, author, description, status, icon, builtin } = data;
   const isEnabled = status === 'active';
   const [processing, setProcessing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -127,7 +127,7 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
         </div>
 
         {/* Version Badge */}
-        <div>
+        <div className='flex items-center gap-2'>
           <Chip
             size='sm'
             variant='flat'
@@ -137,6 +137,17 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
           >
             v{version}
           </Chip>
+          {builtin && (
+            <Chip
+              size='sm'
+              variant='flat'
+              color='secondary'
+              className='h-5 text-xs font-semibold px-0.5'
+              classNames={{ content: 'px-1' }}
+            >
+              内置
+            </Chip>
+          )}
         </div>
       </CardBody>
 
@@ -173,19 +184,21 @@ const PluginDisplayCard: React.FC<PluginDisplayCardProps> = ({
           </Tooltip>
         )}
 
-        <Tooltip content='卸载插件' color='danger'>
-          <Button
-            isIconOnly
-            radius='full'
-            size='sm'
-            variant='light'
-            color='danger'
-            onPress={handleUninstall}
-            isDisabled={processing}
-          >
-            <MdDeleteForever size={20} />
-          </Button>
-        </Tooltip>
+        {!builtin && (
+          <Tooltip content='卸载插件' color='danger'>
+            <Button
+              isIconOnly
+              radius='full'
+              size='sm'
+              variant='light'
+              color='danger'
+              onPress={handleUninstall}
+              isDisabled={processing}
+            >
+              <MdDeleteForever size={20} />
+            </Button>
+          </Tooltip>
+        )}
       </CardFooter>
     </Card>
   );
