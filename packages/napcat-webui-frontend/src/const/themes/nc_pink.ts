@@ -250,7 +250,7 @@ const theme: ThemeConfig = {
 };
 export default {
   theme,
-  author: 'NapCat',
-  name: 'nc_pink',
-  description: 'NapCat Pink Theme',
+  author: 'SHCAP',
+  name: 'shcap_blue',
+  description: 'SHCAP Blue Theme',
 } satisfies ThemeInfo;

@@ -13,6 +13,7 @@ import {
   findAvailableDownloadUrl,
 } from '@/napcat-common/src/mirror';
 import { ILogWrapper } from '@/napcat-common/src/log-interface';
+import { SHCAP_REPO_OWNER, SHCAP_REPO_NAME } from 'napcat-common/src/helper';
 
 // 更新请求体接口
 interface UpdateRequestBody {
@@ -166,7 +167,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
 
       // Action artifacts 通过 nightly.link 下载
       // 格式：https://nightly.link/{owner}/{repo}/actions/runs/{run_id}/{artifact_name}.zip
-      const baseUrl = `https://nightly.link/NapNeko/NapCatQQ/actions/runs/${runId}/${artifactName}.zip`;
+      const baseUrl = `https://nightly.link/${SHCAP_REPO_OWNER}/${SHCAP_REPO_NAME}/actions/runs/${runId}/${artifactName}.zip`;
       actualVersion = targetTag;
 
       webUiLogger?.log(`[NapCat Update] Action artifact URL: ${baseUrl}`);
@@ -189,7 +190,7 @@ export const UpdateNapCatHandler: RequestHandler = async (req, res) => {
       // 处理标准 release 版本
       // 使用 mirror 模块获取 release 信息（不依赖 API）
       // 通过 assetNames 参数直接构建下载 URL，避免调用 GitHub API
-      const release = await getGitHubRelease('NapNeko', 'NapCatQQ', targetTag, {
+      const release = await getGitHubRelease(SHCAP_REPO_OWNER, SHCAP_REPO_NAME, targetTag, {
         assetNames: [ReleaseName, 'NapCat.Framework.zip', 'NapCat.Shell.zip'],
         fetchChangelog: false, // 不需要 changelog，避免 API 调用
         mirror,

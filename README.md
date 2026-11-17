@@ -1,87 +1,193 @@
-<img src="https://napneko.github.io/assets/newnewlogo.png" width = "305" height = "411" alt="NapCat" align=right />
-<div align="center">
+# SHCAP
 
-# NapCat
+> **SHCAP 是 [NapCat](https://github.com/NapNeko/NapCatQQ) 的延续版**（基于 NapCat 4.18.42 独立维护），
+> 一个现代化、轻量级的 QQ 机器人 **OneBot 11** 协议端。
 
-_Modern protocol-side framework implemented based on NTQQ._
+SHCAP 在保持 OneBot 11 协议、插件生态、API 行为与 NapCat 完全兼容的前提下，由我们独立维护与持续更新：
 
-> 云起兮风生，心向远方兮路未曾至.
+- ✅ 兼容 **OneBot 11**（HTTP / WebSocket 正向、反向）
+- ✅ 保留 **NapCat 插件生态**（`.napcat-plugin`、`plugins/` 目录即插即用）
+- ✅ 内置 **WebUI**（Token 登录、实时日志、在线配置、插件管理、版本管理）
+- ✅ 内置 **邮件告警**（登录失败 / 需要验证 / 掉线 / 二维码登录，可选）
+- ✅ Docker 一键部署，开箱即用
+- ✅ 独立品牌与蓝色主题（SH 标识），不再依赖上游仓库
 
-</div>
-
----
-
-## New Framework ?
-
-可以试试更新更好用的 [SnowLuma](https://github.com/SnowLuma/SnowLuma) 作为NapCat Gui替代品。
-
-## Welcome
-
-- NapCatQQ is a modern implementation of the Bot protocol based on NTQQ.
-  - NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
-
-## Feature
-
-- **Easy to Use**
-  - 作为初学者能够轻松使用.
-- **Quick and Efficient**
-  - 在低内存操作系统长时运行.
-- **Rich API Interface**
-  - 完整实现了大部分标准接口.
-- **Stable and Reliable**
-  - 持续稳定的开发与维护.
-
-## Quick Start
-
-可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
-
-**首次使用**请务必查看如下文档看使用教程
-
-> 项目非盈利，涉及 对接问题/基础问题/下层框架问题 请自行搜索解决，本项目社区不提供此类解答。
-
-## Link
-
-| Docs | [![Github.IO](https://img.shields.io/badge/docs%20on-Github.IO-orange)](https://napneko.github.io/) | [![Cloudflare.Worker](https://img.shields.io/badge/docs%20on-Cloudflare.Worker-black)](https://doc.napneko.icu/) | [![Cloudflare.HKServer](https://img.shields.io/badge/docs%20on-Cloudflare.HKServer-informational)](https://napcat.napneko.icu/) |
-|:-:|:-:|:-:|:-:|
-
-| Docs | [![Cloudflare.Pages](https://img.shields.io/badge/docs%20on-Cloudflare.Pages-blue)](https://napneko.pages.dev/) | [![Server.Other](https://img.shields.io/badge/docs%20on-Server.Other-green)](https://napcat.top/) | [![NapCat.Top](https://img.shields.io/badge/docs%20on-NapCat.Top-red)](https://napcat.top/) |
-|:-:|:-:|:-:|:-:|
-
-| QQ Group | [![NapCat Family Group 4](https://img.shields.io/badge/NapCat%20Family%20Group%204-Join-blue)](https://qm.qq.com/q/E4nfkGD6oK) | [![NapCat Family Group 3](https://img.shields.io/badge/NapCat%20Family%20Group%203-Join-blue)](https://qm.qq.com/q/XyiyGPqa42) | [![NapCat Family Group 2](https://img.shields.io/badge/NapCat%20Family%20Group%202-Join-blue)](https://qm.qq.com/q/gq18RH7o7S) | [![NapCat Family Group 1](https://img.shields.io/badge/NapCat%20Family%20Group%201-Join-blue)](https://qm.qq.com/q/VwpnklcXqo) |
-|:-:|:-:|:-:|:-:|:-:|
-
-| Telegram | [![Telegram](https://img.shields.io/badge/Telegram-napcatqq-blue)](https://t.me/napcatqq) |
-|:-:|:-:|
-
-| DeepWiki | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NapNeko/NapCatQQ) |
-|:-:|:-:|
-
-> QQ群因为特殊原因需要入群密钥，请在webui关于页面获取，仅最新的100个版本以内有效。
-
-社区相关日后会进一步加强审核，并严格限制一定时间的入群人数，请具备一定编程基础和问题解决能力再申请入群。
-
-[困困猫猫的高中](https://qm.qq.com/q/14aUVclRUA)
-
-## Thanks
-
-- [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
-
-- [AstrBot](https://github.com/AstrBotDevs/AstrBot) 是完美适配本项目的LLM Bot框架 在此推荐一下
-
-- [MaiBot](https://github.com/MaiM-with-u/MaiBot) 一只赛博群友 麦麦 Bot框架 在此推荐一下
-
-- [qq-chat-exporter](https://github.com/shuakami/qq-chat-exporter/) 基于NapCat的消息导出工具 在此推荐一下
-
-- 不过最最重要的 还是需要感谢屏幕前的你哦~
+> 兼容基线：当前代码基于 **NapCat 4.18.42 + QQ 3.2.30-50969**。
+> 更高版本 QQ（如 3.2.35）因注入点变化暂不兼容，请先使用 3.2.30 客户端。
 
 ---
 
-## License
+## 一、Docker 一键部署（推荐）
 
-本项目采用 混合协议 开源，因此使用本项目时，你需要注意以下几点：
+### 方式 A：docker run（直接复制执行）
 
-1. 第三方库代码或修改部分遵循其原始开源许可.
-2. 本项目获取部分项目授权而不受部分约束
-2. 项目其余逻辑代码采用[本仓库开源许可](./LICENSE).
+```bash
+mkdir -p /opt/shcap/{config,qq,plugins} && cd /opt/shcap
 
-**本仓库仅用于提高易用性，实现消息推送类功能，此外，禁止任何项目未经仓库主作者授权基于 NapCat 代码开发。使用请遵守当地法律法规，由此造成的问题由使用者和提供违规使用教程者负责。**
+docker run -d --name shcap \
+  --restart unless-stopped \
+  -e ACCOUNT=你的QQ号 \
+  -p 6099:6099 \
+  -p 3001:3001 \
+  -v /opt/shcap/config:/app/napcat/config \
+  -v /opt/shcap/qq:/app/.config/QQ \
+  -v /opt/shcap/plugins:/app/napcat/plugins \
+  mlikiowa/napcat-docker:latest
+```
+
+> 想用 SHCAP 的品牌与主题，见「方式 C：覆盖自己的构建产物」。
+
+### 方式 B：docker compose（推荐长期使用）
+
+新建 `/opt/shcap/docker-compose.yml`：
+
+```yaml
+services:
+  shcap:
+    image: mlikiowa/napcat-docker:latest
+    container_name: shcap
+    restart: unless-stopped
+    environment:
+      - ACCOUNT=你的QQ号            # 留空则扫码登录
+      - WEBUI_TOKEN=换成你自己的随机串  # 可选：固定 WebUI 登录令牌
+      - TZ=Asia/Shanghai
+    ports:
+      - "6099:6099"   # WebUI
+      - "3001:3001"   # OneBot HTTP/WS
+    volumes:
+      - ./config:/app/napcat/config
+      - ./qq:/app/.config/QQ
+      - ./plugins:/app/napcat/plugins
+```
+
+```bash
+cd /opt/shcap && docker compose up -d
+```
+
+### 方式 C：覆盖 SHCAP 自己的构建产物（换成我们的界面）
+
+```bash
+# 1. 本地/服务器构建
+git clone https://github.com/yuyuk888/shcap.git && cd shcap
+corepack enable
+pnpm install
+pnpm build:webui
+pnpm build:shell          # 产物在 packages/napcat-shell/dist
+
+# 2. 覆盖到容器
+docker cp packages/napcat-shell/dist/static     shcap:/app/napcat/static
+docker cp packages/napcat-shell/dist/napcat.mjs shcap:/app/napcat/napcat.mjs
+docker restart shcap
+```
+
+> 也可以在 compose 里直接挂载：
+> `- ./packages/napcat-shell/dist/static:/app/napcat/static:ro`
+> `- ./packages/napcat-shell/dist/napcat.mjs:/app/napcat/napcat.mjs:ro`
+
+### 3. 登录 WebUI
+
+```bash
+docker logs shcap 2>&1 | grep -i token      # 取 WebUI Token
+```
+
+浏览器打开 `http://服务器IP:6099/webui`，输入 Token 登录；
+QQ 未登录时打开 `基础信息`，用手机 QQ 扫二维码登录。
+
+### 4. 配置 OneBot（连 AstrBot / NoneBot / 云崽 等）
+
+`网络配置` 中新增：
+- **WebSocket 服务端**：`ws://服务器IP:3001`（默认）
+- 或 **HTTP 服务端** + **HTTP 上报**
+
+连接成功后日志出现 `OneBot11 适配器初始化完成`、`[OneBot] [HTTP Server Adapter] Start On 0.0.0.0:3001`。
+
+---
+
+## 二、源码构建（本地开发）
+
+```bash
+# 环境：Node.js >= 22，pnpm（corepack enable 或 npm i -g pnpm）
+pnpm install
+pnpm build:webui     # 构建 WebUI 前端 → packages/napcat-webui-frontend/dist
+pnpm build:shell     # 打包壳 + 前端 → packages/napcat-shell/dist
+```
+
+产物结构：
+
+```
+packages/napcat-shell/dist/
+├── napcat.mjs        # 主程序
+├── static/           # WebUI 静态资源
+├── worker/ native/   # 运行依赖
+├── loadNapCat.js
+├── package.json
+└── qqnt.json
+```
+
+Linux 服务器上可直接把 `dist/` 同步到容器的 `/app/napcat/`（保留 `config/`、`plugins/`）。
+
+---
+
+## 三、邮件告警（可选）
+
+登录失败、需要验证、掉线、二维码登录时自动发邮件：
+
+```bash
+mkdir -p /opt/shcap/shcap-notify
+# 将仓库 scripts/shcap-notify 下的 monitor.py / config.json 放入该目录
+vi /opt/shcap/shcap-notify/config.json    # 填 SMTP 账号、授权码、收件人
+crontab -e
+*/2 * * * * cd /opt/shcap/shcap-notify && /usr/bin/python3 monitor.py >/dev/null 2>&1
+```
+
+`config.json` 关键字段：
+
+```json
+{
+  "enabled": true,
+  "smtp": { "host": "smtp.qq.com", "port": 465, "ssl": true,
+            "user": "你的邮箱", "password": "SMTP授权码", "from": "你的邮箱" },
+  "to": ["收件邮箱"],
+  "events": { "login_fail": true, "need_verify": true, "offline": true, "qr_login": false }
+}
+```
+
+---
+
+## 四、目录与端口
+
+| 路径 | 说明 |
+| --- | --- |
+| `/app/napcat/config` | 全局配置（`webui.json`、`onebot11_<QQ>.json` 等） |
+| `/app/.config/QQ` | QQ 账号数据、登录态 |
+| `/app/napcat/plugins` | 插件目录 |
+| `/app/napcat/static` | WebUI 静态资源 |
+
+| 端口 | 用途 |
+| --- | --- |
+| 6099 | WebUI |
+| 3001 | OneBot HTTP / WebSocket |
+
+---
+
+## 五、常见问题
+
+**Q：WebUI 打不开？**
+检查 `docker ps` 端口映射、防火墙放行 6099；`docker logs shcap` 是否出现 `WebUI Token`。
+
+**Q：验证码 / 扫码失败？**
+容器内带 Xvfb 虚拟显示，首次登录需扫码；账号风控请更换网络或稍后再试。
+
+**Q：更新后界面回退成原版？**
+`static/` 是挂载或拷贝的产物，重新执行「方式 C」覆盖即可。
+
+**Q：能升级到 QQ 3.2.35 吗？**
+暂不支持（注入点不兼容），请使用 3.2.30 客户端；后续版本适配中。
+
+---
+
+## 六、致谢与声明
+
+- 项目基于 **[NapNeko/NapCatQQ](https://github.com/NapNeko/NapCatQQ)** 4.18.42 派生，遵循上游开源许可；
+- OneBot 11 协议实现参考原 NapCat 代码，插件生态完全兼容；
+- 本项目仅用于**个人学习与自建机器人**，请遵守 QQ 用户协议与所在地法律法规，勿用于商业滥用。

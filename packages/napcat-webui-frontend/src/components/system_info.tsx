@@ -383,9 +383,12 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
 
   const selectedVersionTag = selectedVersion?.tag || '';
   const isSelectedDowngrade = isDowngrade(selectedVersionTag);
+  // SHCAP：当前运行版本无需再「更新」（仓库暂无 Release 时列表里只有当前版本）
+  const isSelectedCurrent = !!selectedVersion &&
+    selectedVersionTag.replace(/^v/, '') === currentVersion;
 
   const performUpdate = async (force: boolean) => {
-    if (!selectedVersion) return;
+    if (!selectedVersion || isSelectedCurrent) return;
     setUpdateStatus('updating');
     setErrorMessage('');
 
@@ -772,14 +775,14 @@ const VersionSelectDialogContent: React.FC<VersionSelectDialogProps> = ({
         <button
           className={clsx(
             'px-4 py-2 text-sm rounded-lg transition-colors text-white shadow-sm',
-            selectedVersion && (!isSelectedDowngrade || forceUpdate)
+            selectedVersion && !isSelectedCurrent && (!isSelectedDowngrade || forceUpdate)
               ? 'bg-primary-500 hover:bg-primary-600 shadow-primary-500/20'
               : 'bg-default-300 cursor-not-allowed'
           )}
-          disabled={!selectedVersion || (isSelectedDowngrade && !forceUpdate)}
+          disabled={!selectedVersion || isSelectedCurrent || (isSelectedDowngrade && !forceUpdate)}
           onClick={handleUpdate}
         >
-          {isSelectedDowngrade ? '确认降级更新' : '更新到此版本'}
+          {isSelectedCurrent ? '已是最新版本' : (isSelectedDowngrade ? '确认降级更新' : '更新到此版本')}
         </button>
       </div>
 

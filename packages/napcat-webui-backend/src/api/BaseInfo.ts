@@ -3,7 +3,7 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiConfig, webUiPathWrapper } from '@/napcat-webui-backend/index';
-import { getLatestTag, getAllTags, compareSemVer } from 'napcat-common/src/helper';
+import { getLatestTag, getAllTags, compareSemVer, SHCAP_REPO_OWNER, SHCAP_REPO_NAME } from 'napcat-common/src/helper';
 import { getLatestActionArtifacts, getMirrorConfig } from '@/napcat-common/src/mirror';
 import { NapCatCoreWorkingEnv } from '@/napcat-webui-backend/src/types';
 import crypto from 'crypto';
@@ -89,12 +89,21 @@ export const getAllReleasesHandler: RequestHandler = async (req, res) => {
         // 如果获取 tags 失败，返回空列表而不是抛出错误
         versions = [];
       }
+
+      // SHCAP：仓库暂时还没有发布 Release 时，至少把当前运行版本作为可选项返回，
+      // 避免「版本管理」页面显示「共 0 个版本」。
+      if (versions.length === 0) {
+        const currentVersion = WebUiDataRuntime.GetNapCatVersion();
+        if (currentVersion) {
+          versions = [{ tag: currentVersion, type: 'release' } as VersionInfo];
+        }
+      }
     }
 
     // 获取 Action Artifacts（仅当需要时）
     if (needActions) {
       try {
-        const { artifacts, mirror: actionMirror } = await getLatestActionArtifacts('NapNeko', 'NapCatQQ', 'build.yml', 'main', 10, mirror);
+        const { artifacts, mirror: actionMirror } = await getLatestActionArtifacts(SHCAP_REPO_OWNER, SHCAP_REPO_NAME, 'build.yml', 'main', 10, mirror);
 
         // 根据当前工作环境自动过滤对应的 artifact 类型
         const isFramework = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework;

@@ -79,7 +79,7 @@ export default function AboutPage () {
           关于 SHCAP
         </h1>
         <div className='flex items-center gap-4 text-small text-default-500'>
-          <p>现代化、轻量级的 QQ 机器人协议端</p>
+          <p>NapCat 的延续版 · 现代化、轻量级 QQ 机器人协议端</p>
           <Divider orientation='vertical' className='h-4' />
           <VersionInfo />
         </div>
@@ -96,8 +96,13 @@ export default function AboutPage () {
             <CardHeader className='pb-0 pt-4 px-4 flex-col items-start'>
               <h2 className='text-lg font-bold'>项目简介</h2>
             </CardHeader>
-            <CardBody className='py-6 flex items-center justify-center'>
+            <CardBody className='py-6 flex flex-col items-center justify-center gap-4'>
               <Image src={logo} alt='SHCAP' width={220} className='rounded-2xl' />
+              <p className='text-small text-default-500 text-center max-w-xl leading-relaxed'>
+                SHCAP 是 NapCat（NapNeko/NapCatQQ）4.18.42 的延续版本，在保持 OneBot 11
+                协议与插件生态兼容的前提下，独立维护与持续更新：内置蓝色主题与 SH 品牌、
+                支持 Docker 一键部署、并附带登录失败 / 掉线邮件告警能力。
+              </p>
             </CardBody>
           </Card>
 

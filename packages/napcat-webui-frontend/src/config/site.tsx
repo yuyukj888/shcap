@@ -25,7 +25,7 @@ export interface MenuItem {
 
 export const siteConfig = {
   name: 'SHCAP',
-  description: 'SHCAP WebUI.',
+  description: 'SHCAP · NapCat 的延续版，轻量级 QQ 机器人协议端。',
   navItems: [
     {
       label: '基础信息',
