@@ -191,6 +191,26 @@ Release 包（zip），在 **插件管理 → 安装插件** 中上传安装。
 
 ---
 
+## 四点五、发布包说明（GitHub Releases）
+
+每个 Release 页面包含三类文件：
+
+| 文件 | 用途 |
+| --- | --- |
+| `Source code (zip / tar.gz)` | GitHub 自动附带的**完整源代码**，可直接编译 |
+| `NapCat.Shell.zip` | **WebUI 版本管理 / 手动更新**用的程序包（`napcat.mjs`、`static/`、`worker/`、`native/`、`loadNapCat.js`、`package.json`、`qqnt.json`；**不含 `config/`、`plugins/`**） |
+| `shcap-docker.tar.gz` | **Docker 一键部署整包**：已构建好的 SHCAP Shell + `docker-compose.yml` + `.env.example` + `README.md`，解压改 `ACCOUNT` 后 `docker compose up -d` 即可 |
+
+### 更新行为（不会覆盖设置）
+
+WebUI →「基础信息」→ 点版本号 → 版本管理 → 选择 `v1.0.2` → 更新，然后 `docker restart shcap`。
+
+- 更新只替换程序文件；发布包**不含 `config/`**，因此 `config/webui.json`（WebUI 令牌/主题）、`config/mail.json`（邮件配置）、`config/onebot11_*.json` 等全部保留；
+- 实测：更新前后 `webui.json` / `mail.json` 的 md5 不变，`docker logs` 可见 `Preserving existing user config: config/napcat.json` 与 `更新完成`；
+- 下载走 GitHub 加速镜像（`gh-proxy.com` 等），服务器在国内也可更新。
+
+---
+
 ## 五、常见问题
 
 **Q：WebUI 打不开？**
