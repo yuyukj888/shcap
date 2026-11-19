@@ -3,7 +3,13 @@ services:
     image: docker.1ms.run/mlikiowa/napcat-docker:latest
     container_name: shcap
     restart: unless-stopped
+    # 固定主机名：Docker 默认用容器 ID 当 hostname，重建后 QQ 会当成新设备，反复要求新设备验证
+    hostname: "SHCAP的电脑"
+    # 给 QQ 留出退出落盘时间；配合 entrypoint 的 exec，登录态才能写回卷，重启后自动快速登录
+    stop_grace_period: 60s
     env_file: .env
+    environment:
+      - NAPCAT_QUICK_PASSWORD=${NAPCAT_QUICK_PASSWORD:-}
     ports:
       - "6099:6099"
       - "3001:3001"
