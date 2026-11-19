@@ -19,70 +19,55 @@ SHCAP 在保持 OneBot 11 协议、插件生态、API 行为与 NapCat 完全兼
 
 ## 一、Docker 一键部署（推荐）
 
+官方镜像 `ghcr.io/yuyukj888/shcap` 已经把 SHCAP 的界面、HTML 邮件告警、优雅退出补丁全部打进去了，
+**拉下来就能用，不需要再下载 Shell 包或自己覆盖文件**。
+
 ### 方式 A：docker run（直接复制执行）
 
 ```bash
-mkdir -p /opt/shcap/{config,qq,plugins} && cd /opt/shcap
+mkdir -p /opt/shcap/{config,qq} && cd /opt/shcap
 
 docker run -d --name shcap \
   --restart unless-stopped \
+  --hostname "SHCAP的电脑" \
+  --stop-timeout 60 \
   -e ACCOUNT=你的QQ号 \
   -p 6099:6099 \
   -p 3001:3001 \
   -v /opt/shcap/config:/app/napcat/config \
   -v /opt/shcap/qq:/app/.config/QQ \
-  -v /opt/shcap/plugins:/app/napcat/plugins \
-  mlikiowa/napcat-docker:latest
+  ghcr.io/yuyukj888/shcap:1.0.5
 ```
-
-> 想用 SHCAP 的品牌与主题，见「方式 C：覆盖自己的构建产物」。
 
 ### 方式 B：docker compose（推荐长期使用）
 
-新建 `/opt/shcap/docker-compose.yml`：
-
-```yaml
-services:
-  shcap:
-    image: mlikiowa/napcat-docker:latest
-    container_name: shcap
-    restart: unless-stopped
-    environment:
-      - ACCOUNT=你的QQ号            # 留空则扫码登录
-      - WEBUI_TOKEN=换成你自己的随机串  # 可选：固定 WebUI 登录令牌
-      - TZ=Asia/Shanghai
-    ports:
-      - "6099:6099"   # WebUI
-      - "3001:3001"   # OneBot HTTP/WS
-    volumes:
-      - ./config:/app/napcat/config
-      - ./qq:/app/.config/QQ
-      - ./plugins:/app/napcat/plugins
+```bash
+git clone https://github.com/yuyukj888/shcap.git && cd shcap/deploy
+cp .env.example .env        # 填 ACCOUNT（QQ 号），可选 NAPCAT_QUICK_PASSWORD
+docker compose up -d
 ```
 
+`deploy/docker-compose.yml` 已经配好固定主机名（避免被当成新设备）、`stop_grace_period: 60s`（让登录态落盘）、
+配置与 QQ 数据卷（`./config`、`./qq`），重建容器不会丢登录。
+
+> 国内拉不动 ghcr.io 时，把镜像换成南京大学镜像源：`ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5`。
+
+### 方式 C：自己覆盖界面（改壳 / 二开）
+
+镜像里的 `/app/napcat` 就是 SHCAP Shell，想替换成自己的构建产物：
+
 ```bash
-cd /opt/shcap && docker compose up -d
-```
+# 1. 本地构建
+git clone https://github.com/yuyukj888/shcap.git && cd shcap
+corepack enable && pnpm install && pnpm build:webui && pnpm build:shell
 
-### 方式 C：覆盖 SHCAP 自己的构建产物（换成我们的界面）
-
-```bash
-# 1. 本地/服务器构建
-git clone https://github.com/yuyuk888/shcap.git && cd shcap
-corepack enable
-pnpm install
-pnpm build:webui
-pnpm build:shell          # 产物在 packages/napcat-shell/dist
-
-# 2. 覆盖到容器
-docker cp packages/napcat-shell/dist/static     shcap:/app/napcat/static
-docker cp packages/napcat-shell/dist/napcat.mjs shcap:/app/napcat/napcat.mjs
+# 2. 覆盖到运行中的容器
+docker cp packages/napcat-shell/dist/static      shcap:/app/napcat/static
+docker cp packages/napcat-shell/dist/napcat.mjs  shcap:/app/napcat/napcat.mjs
 docker restart shcap
 ```
 
-> 也可以在 compose 里直接挂载：
-> `- ./packages/napcat-shell/dist/static:/app/napcat/static:ro`
-> `- ./packages/napcat-shell/dist/napcat.mjs:/app/napcat/napcat.mjs:ro`
+> 也可以挂载：`- ./packages/napcat-shell/dist/static:/app/napcat/static:ro`。
 
 ### 3. 登录 WebUI
 

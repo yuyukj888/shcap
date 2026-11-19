@@ -1,11 +1,8 @@
 services:
   shcap:
-    # 默认用上游基础镜像即可：它的运行时 QQ 已是 3.2.35，只是"关于"页读 package.json 显示 3.2.30
-    # 需要"关于"页也显示 3.2.35：自备 deb 后用 deploy/Dockerfile.qq335 构建（见 README「QQ 版本」）
-    image: docker.1ms.run/mlikiowa/napcat-docker:latest
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.qq335
+    # SHCAP 官方镜像：已内置 SHCAP 界面 + HTML 邮件告警 + 优雅退出补丁，pull 下来直接可用
+    # 国内加速：ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5
+    image: ghcr.io/yuyukj888/shcap:1.0.5
     container_name: shcap
     restart: unless-stopped
     # 固定主机名：Docker 默认用容器 ID 当 hostname，重建后 QQ 会当成新设备，反复要求新设备验证
@@ -19,6 +16,10 @@ services:
       - "6099:6099"
       - "3001:3001"
     volumes:
-      - ./napcat:/app/napcat
+      # 配置（OneBot / WebUI / 邮件告警）必须持久化，否则重建容器会丢
+      - ./config:/app/napcat/config
+      # QQ 登录态：重启后能否免验证快速登录全靠它
       - ./qq:/app/.config/QQ
-      - ./patches/entrypoint.sh:/app/entrypoint.sh:ro
+      # 镜像里已内置 SHCAP Shell 与优雅退出补丁；只有想自行改壳/加插件时才需要挂载
+      # - ./napcat:/app/napcat
+      # - ./patches/entrypoint.sh:/app/entrypoint.sh:ro
