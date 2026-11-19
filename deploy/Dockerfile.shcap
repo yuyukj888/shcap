@@ -1,0 +1,19 @@
+# SHCAP · 从 Release 的 Shell 包自己构建镜像
+#
+# 用法（与 NapCat 官方镜像同构：把 Shell 包交给基础镜像，首次启动自动解压）：
+#   1. 下载 https://github.com/yuyukj888/shcap/releases 里的 NapCat.Shell.zip
+#   2. 本文件与 patches/entrypoint.sh、NapCat.Shell.zip 放在同一目录
+#   3. docker build -f Dockerfile.shcap -t shcap:local .
+#
+# 产物已经包含：SHCAP 界面、HTML 邮件模板、优雅退出补丁（QQ 作为 PID1 收 SIGTERM）
+
+FROM docker.1ms.run/mlikiowa/napcat-docker:latest
+
+# Shell 包内置 node_modules，基础镜像 entrypoint 首次启动会解压到 /app/napcat
+COPY NapCat.Shell.zip /app/NapCat.Shell.zip
+
+# 优雅退出补丁：gosu 改成 exec，容器 stop 从 61 秒降到 1-2 秒，登录态才能落盘
+COPY patches/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+EXPOSE 6099 3001

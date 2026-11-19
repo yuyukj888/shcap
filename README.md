@@ -90,6 +90,23 @@ docker cp packages/napcat-shell/dist/napcat.mjs  shcap:/app/napcat/napcat.mjs
 docker restart shcap
 ```
 
+### 方式 D：从 Release 的 Shell 包自己 build（与 NapCat 官方镜像同构）
+
+Release 里的 `NapCat.Shell.zip` 和 NapCat 官方保持一致：**内置了 `node_modules`**，所以可以直接交给官方基础镜像，由 entrypoint 首次启动时解压，不需要 node/npm。
+
+```bash
+mkdir -p shcap-build/patches && cd shcap-build
+cp /path/to/NapCat.Shell.zip .                       # v1.0.5 Release 资产
+
+curl -fsSLO https://raw.githubusercontent.com/yuyukj888/shcap/main/deploy/Dockerfile.shcap
+curl -fsSL -o patches/entrypoint.sh https://raw.githubusercontent.com/yuyukj888/shcap/main/deploy/patches/entrypoint.sh
+
+docker build -f Dockerfile.shcap -t shcap:local .
+```
+
+镜像里做了三件事：装 Shell 包（含依赖）、换成 `exec` 版 entrypoint（QQ 成为 PID1，stop 1-2 秒）、暴露 6099/3001。
+之后把 `deploy/docker-compose.yml` 里的 `image:` 换成 `shcap:local` 就能跑。
+
 ---
 
 ## 二、第一次使用
@@ -197,7 +214,8 @@ QQ 未登录时面板会自动跳到登录页：
 deploy/
   docker-compose.yml      # 推荐部署方式（固定主机名 + 优雅停止 + 数据卷）
   .env.example            # ACCOUNT / NAPCAT_QUICK_PASSWORD
-  Dockerfile              # 官方镜像构建
+  Dockerfile              # 官方镜像构建（预置 Shell 包）
+  Dockerfile.shcap        # 用 Release 的 Shell 包自己 build（含 node_modules）
   patches/entrypoint.sh   # 优雅退出补丁（QQ 成为 PID1）
 packages/                 # SHCAP 源码（shell / webui / framework / adapter …）
 ```
