@@ -279,12 +279,6 @@ pnpm typecheck
 
 ---
 
-## 七点五、发布新版本
-
-发版按 [RELEASE.md](RELEASE.md) 的清单走：Assets 只放小包（`NapCat.Shell.zip` 必须内置 `node_modules`）+ 镜像推 GHCR，两者版本一致。
-
----
-
 ## 八、联系与赞助
 
 <div align="center">
