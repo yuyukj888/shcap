@@ -16,3 +16,4 @@ services:
     volumes:
       - ./napcat:/app/napcat
       - ./qq:/app/.config/QQ
+      - ./patches/entrypoint.sh:/app/entrypoint.sh:ro
