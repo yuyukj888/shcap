@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import {
+  buildAlertPreview,
   getMailConfig,
   isMailReady,
   MailConfig,
@@ -46,9 +47,10 @@ export const TestMailHandler: RequestHandler = async (req, res) => {
     const cfg = getMailConfig();
     const to = (body.to || cfg.to || '').trim();
     if (!to) return sendError(res, '请先填写收件人');
+    const preview = buildAlertPreview('offline');
     const result = await sendMail(
       '[SHCAP] 测试邮件',
-      `<p>这是一封来自 SHCAP 的测试邮件。</p><p>发送时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</p>`
+      preview.html
     );
     return sendSuccess(res, { to, ...result });
   } catch (e) {

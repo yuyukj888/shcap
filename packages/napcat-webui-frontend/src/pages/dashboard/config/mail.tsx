@@ -32,7 +32,6 @@ const MailConfigCard = () => {
       to: '',
       notifyOffline: true,
       notifyRecover: true,
-      cooldownMinutes: 10,
     },
   });
 
@@ -200,20 +199,6 @@ const MailConfigCard = () => {
             )}
           />
         </div>
-        <Controller
-          control={control}
-          name='cooldownMinutes'
-          render={({ field }) => (
-            <Input
-              {...field}
-              value={String(field.value ?? '')}
-              onValueChange={(v) => field.onChange(Number(v) || 0)}
-              type='number'
-              label='提醒冷却（分钟）'
-              description='同一状态切换在该时间窗口内不重复发信'
-            />
-          )}
-        />
         <div className='flex flex-wrap gap-3'>
           <Button color='primary' variant='flat' isLoading={testing} onPress={onTest}>
             发送测试邮件

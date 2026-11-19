@@ -11,7 +11,8 @@ export interface MailConfigData {
   to: string;
   notifyOffline: boolean;
   notifyRecover: boolean;
-  cooldownMinutes: number;
+  /** 已废弃：看门狗不再按冷却窗口压制提醒 */
+  cooldownMinutes?: number;
 }
 
 export interface MailConfigResponse {

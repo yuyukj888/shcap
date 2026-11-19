@@ -1,10 +1,12 @@
 import fs from 'node:fs';
 import net from 'node:net';
+import os from 'node:os';
 import tls from 'node:tls';
 import { resolve } from 'node:path';
 
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { buildAlertMail, type MailKind, type MailVars } from '@/napcat-webui-backend/src/helper/MailTemplates';
 
 export interface MailConfig {
   enable: boolean;
@@ -17,7 +19,8 @@ export interface MailConfig {
   to: string;
   notifyOffline: boolean;
   notifyRecover: boolean;
-  cooldownMinutes: number;
+  /** 已废弃：看门狗不再用冷却窗口压制提醒，保留字段只为兼容旧配置文件 */
+  cooldownMinutes?: number;
 }
 
 const DEFAULT_CONFIG: MailConfig = {
@@ -31,11 +34,14 @@ const DEFAULT_CONFIG: MailConfig = {
   to: '',
   notifyOffline: true,
   notifyRecover: true,
-  cooldownMinutes: 10,
 };
 
 function configFile (): string {
   return resolve(webUiPathWrapper.configPath, './mail.json');
+}
+
+function stateFile (): string {
+  return resolve(webUiPathWrapper.configPath, './mail_state.json');
 }
 
 export function getMailConfig (): MailConfig {
@@ -59,6 +65,82 @@ export function saveMailConfig (patch: Partial<MailConfig>): MailConfig {
 
 export function isMailReady (cfg: MailConfig = getMailConfig ()): boolean {
   return !!(cfg.host && cfg.user && cfg.pass);
+}
+
+/** 最后一次观察到的登录状态，落盘保存，进程重启不会丢掉「之前是在线还是离线」 */
+interface MailState {
+  online: boolean;
+  at: number;
+}
+
+function loadMailState (): MailState | null {
+  try {
+    const raw = fs.readFileSync(stateFile(), 'utf-8');
+    const data = JSON.parse(raw);
+    if (typeof data?.online !== 'boolean') return null;
+    return { online: data.online, at: Number(data.at) || 0 };
+  } catch {
+    return null;
+  }
+}
+
+function saveMailState (state: MailState): void {
+  try {
+    fs.writeFileSync(stateFile(), JSON.stringify(state, null, 4));
+  } catch (e) {
+    console.log(`[SHCAP] 保存邮件告警状态失败: ${(e as Error).message}`);
+  }
+}
+
+function firstLanIp (): string {
+  try {
+    for (const list of Object.values(os.networkInterfaces())) {
+      for (const item of list || []) {
+        if (item.family === 'IPv4' && !item.internal) return item.address;
+      }
+    }
+  } catch { /* ignore */ }
+  return '';
+}
+
+function webUiPort (): number {
+  try {
+    const raw = JSON.parse(fs.readFileSync(resolve(webUiPathWrapper.configPath, './webui.json'), 'utf-8'));
+    const port = Number(raw?.port);
+    if (port > 0) return port;
+  } catch { /* ignore */ }
+  return 6099;
+}
+
+/** 面板地址：可用环境变量 SHCAP_PANEL_URL 覆盖，默认取本机内网 IP + WebUI 端口 */
+function panelUrl (): string {
+  const envUrl = process.env.SHCAP_PANEL_URL;
+  if (envUrl) return envUrl;
+  const ip = firstLanIp() || '127.0.0.1';
+  return `https://${ip}:${webUiPort()}`;
+}
+
+function alertVars (cfg: MailConfig): MailVars {
+  const info = (() => {
+    try {
+      return WebUiDataRuntime.getQQLoginInfo();
+    } catch {
+      return null;
+    }
+  })();
+  let uin = '';
+  try {
+    uin = String(WebUiDataRuntime.getQQLoginUin() || '');
+  } catch { /* ignore */ }
+  return {
+    time: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false }),
+    uin,
+    nick: info?.nick || '',
+    panel: panelUrl(),
+    host: firstLanIp() || '127.0.0.1',
+    mailFrom: cfg.from || cfg.user,
+    mailTo: cfg.to,
+  };
 }
 
 interface SmtpReply {
@@ -248,10 +330,30 @@ export async function sendMail (subject: string, html: string): Promise<MailSend
   }
 }
 
+/** 发一封告警邮件（模板内置），失败只打日志，不影响看门狗继续巡检 */
+async function sendAlertMail (kind: MailKind): Promise<void> {
+  const cfg = getMailConfig();
+  let subject = '';
+  try {
+    const mail = buildAlertMail(kind, alertVars(cfg));
+    subject = mail.subject;
+    const res = await sendMail(mail.subject, mail.html);
+    if (res.success) {
+      console.log(`[SHCAP] 邮件已发送: ${mail.subject}`);
+    } else {
+      console.log(`[SHCAP] 邮件发送失败（${mail.subject}）: ${res.message}`);
+    }
+  } catch (e) {
+    console.log(`[SHCAP] 邮件发送异常（${subject || kind}）: ${(e as Error).message}`);
+  }
+}
+
+/** 供「发送测试邮件」使用的模板预览 */
+export function buildAlertPreview (kind: MailKind): { subject: string; html: string } {
+  return buildAlertMail(kind, alertVars(getMailConfig()));
+}
+
 let watchdogStarted = false;
-let lastFocusedOnline: boolean | null = null;
-let lastAlertAt = 0;
-let wasEverOnline = false;
 
 async function watchdogTick (): Promise<void> {
   const cfg = getMailConfig();
@@ -262,34 +364,19 @@ async function watchdogTick (): Promise<void> {
   } catch {
     return;
   }
+  const prev = loadMailState();
   const now = Date.now();
-  const cooldown = Math.max(1, cfg.cooldownMinutes) * 60 * 1000;
-  if (lastFocusedOnline === null) {
-    lastFocusedOnline = online;
-    wasEverOnline = online;
+  if (!prev) {
+    // 首次运行：只记录基线，不补发历史状态
+    saveMailState({ online, at: now });
     return;
   }
-  if (online && !wasEverOnline) {
-    // 启动后首次登录成功，不算「恢复上线」，只记状态
-    wasEverOnline = true;
-    lastFocusedOnline = true;
-    return;
-  }
-  if (lastFocusedOnline !== online) {
-    lastFocusedOnline = online;
-    if (!online && cfg.notifyOffline && now - lastAlertAt > cooldown) {
-      lastAlertAt = now;
-      await sendMail(
-        '[SHCAP] QQ 已掉线',
-        `<p>SHCAP 检测到 QQ 账号已离线。</p><p>时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</p><p>请登录 WebUI 查看并重新扫码登录。</p>`
-      );
-    } else if (online && cfg.notifyRecover && now - lastAlertAt > cooldown) {
-      lastAlertAt = now;
-      await sendMail(
-        '[SHCAP] QQ 已重新上线',
-        `<p>SHCAP 检测到 QQ 账号已重新登录。</p><p>时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</p>`
-      );
-    }
+  if (prev.online === online) return;
+  saveMailState({ online, at: now });
+  if (!online) {
+    if (cfg.notifyOffline) await sendAlertMail('offline');
+  } else if (cfg.notifyRecover) {
+    await sendAlertMail('recovered');
   }
 }
 
@@ -297,7 +384,7 @@ export function startMailWatchdog (): void {
   if (watchdogStarted) return;
   watchdogStarted = true;
   console.log('[SHCAP] 邮件告警看门狗已启动（每 60 秒检测一次 QQ 在线状态）');
-  // 启动时先跑一次，建立初始在线状态，避免重启后误发「恢复上线」
+  // 启动时先跑一次：与上次落盘状态不同会立即发信（进程重启不再吞掉恢复通知）
   setTimeout(() => {
     void watchdogTick();
   }, 10 * 1000);
