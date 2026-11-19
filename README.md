@@ -1,28 +1,48 @@
+<div align="center">
+
 # SHCAP
 
-> **SHCAP 是 [NapCat](https://github.com/NapNeko/NapCatQQ) 的延续版**（基于 NapCat 4.18.42 独立维护），
-> 一个现代化、轻量级的 QQ 机器人 **OneBot 11** 协议端。
+**NapCat 的延续版 · 现代化 QQ 机器人 OneBot 11 协议端**
 
-SHCAP 在保持 OneBot 11 协议、插件生态、API 行为与 NapCat 完全兼容的前提下，由我们独立维护与持续更新：
+[![version](https://img.shields.io/badge/version-1.0.5-2f6fed?style=flat-square)](https://github.com/yuyukj888/shcap/releases)
+[![docker](https://img.shields.io/badge/docker-ghcr.io%2Fyuyukj888%2Fshcap-2496ed?style=flat-square)](https://github.com/yuyukj888/shcap/pkgs/container/shcap)
+[![OneBot11](https://img.shields.io/badge/OneBot-11-4c1?style=flat-square)](https://11.onebot.dev/)
+[![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4-SH%E5%B7%A5%E4%BD%9C%E5%AE%A4-12b7f5?style=flat-square)](https://qm.qq.com/q/j6oy4NvXbi)
 
-- ✅ 兼容 **OneBot 11**（HTTP / WebSocket 正向、反向）
-- ✅ 保留 **NapCat 插件生态**（`.napcat-plugin`、`plugins/` 目录即插即用）
-- ✅ 内置 **WebUI**（Token 登录、实时日志、在线配置、插件管理、版本管理）
-- ✅ 内置 **邮件告警**（登录失败 / 需要验证 / 掉线 / 二维码登录，可选）
-- ✅ Docker 一键部署，开箱即用
-- ✅ 独立品牌与蓝色主题（SH 标识），不再依赖上游仓库
+[快速开始](#一快速开始) · [邮件告警](#四邮件告警) · [常见问题](#六常见问题) · [联系与赞助](#八联系与赞助)
 
-> 兼容基线：当前代码基于 **NapCat 4.18.42 + QQ 3.2.30-50969**。
-> 更高版本 QQ（如 3.2.35）因注入点变化暂不兼容，请先使用 3.2.30 客户端。
+</div>
 
 ---
 
-## 一、Docker 一键部署（推荐）
+## 这是什么
 
-官方镜像 `ghcr.io/yuyukj888/shcap` 已经把 SHCAP 的界面、HTML 邮件告警、优雅退出补丁全部打进去了，
-**拉下来就是 SHCAP，不需要再下载 Shell 包、也不用覆盖文件**。
+SHCAP 是 [NapCat](https://github.com/NapNeko/NapCatQQ) 的延续版（基于 NapCat 4.18.42 独立维护），
+把「QQ 机器人 + OneBot 11」做成一个**装完就能用**的成品：
 
-### 方式 A：docker run（直接复制执行）
+- 兼容 **OneBot 11**：HTTP / WebSocket 正向（服务端）、反向（客户端）都支持
+- 保留 **NapCat 插件生态**：`.napcat-plugin` 与 `plugins/` 目录即插即用
+- 内置 **WebUI**：Token 登录、实时日志、在线改配置、插件管理、版本管理
+- 内置 **HTML 邮件告警**：掉线、恢复、登录失败、需要验证都会发信，手机与电脑都好读
+- **重启后免验证快速登录**：固定主机名 + 优雅退出，容器重建不再反复要求新设备验证
+- 独立品牌与蓝色主题（SH 标识），不再依赖上游仓库
+
+> **关于 QQ 版本**：镜像内是 QQ **3.2.35**；NapCat 4.18.42 的偏移表主要覆盖 3.2.30–3.2.35 区间。
+> 如果你自己换 QQ deb 包，注意 `/opt/QQ/resources/app/package.json` 的 `main` 必须回到 `./loadNapCat.js`，
+> 否则只有 QQ 进程、没有 NapCat（详见 [打包自己的 QQ 版本](#打包自己的-qq-版本)）。
+
+---
+
+## 一、快速开始
+
+官方镜像 `ghcr.io/yuyukj888/shcap` 已经把 **SHCAP 界面 + HTML 邮件模板 + 优雅退出补丁**全部打了进去。
+**拉下来就是 SHCAP**，不需要再下载 Shell 包、也不用覆盖文件。
+
+> 镜像约 1.57 GB，已内置运行时依赖（容器里没有 node/npm）。
+> 当前 digest：`sha256:ca49a492028c7ed562bc217919dc5cb45fe53612c3ac820f85ca26de7a074d7c`
+> 国内拉不动 `ghcr.io` 时换成南京大学镜像源：`ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5`
+
+### 方式 A：docker run
 
 ```bash
 mkdir -p /opt/shcap/{config,qq} && cd /opt/shcap
@@ -47,18 +67,19 @@ cp .env.example .env        # 填 ACCOUNT（QQ 号），可选 NAPCAT_QUICK_PASS
 docker compose up -d
 ```
 
-`deploy/docker-compose.yml` 已配好固定主机名（避免 QQ 当成新设备）、`stop_grace_period: 60s`（让登录态落盘）、
-配置与 QQ 数据卷（`./config`、`./qq`），重建容器不丢登录。
+`deploy/docker-compose.yml` 已经配好三件关键的事：
 
-> 国内拉不动 ghcr.io 时换成南京大学镜像源：`ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5`。
+| 配置 | 作用 |
+|---|---|
+| `hostname: "SHCAP的电脑"` | 固定设备名。Docker 默认用容器 ID 当主机名，重建一次 QQ 就当新设备，反复要验证 |
+| `stop_grace_period: 60s` | 给 QQ 留出退出时间，把登录态写回卷（否则重启必掉登录） |
+| `./config`、`./qq` 两个卷 | 配置与 QQ 登录态持久化，重建容器不丢 |
 
-镜像本身：约 1.57 GB，已内置 `node_modules`（容器里没有 node/npm，运行时依赖只能随镜像带），
-digest `sha256:ca49a492028c7ed562bc217919dc5cb45fe53612c3ac820f85ca26de7a074d7c`。
-已实测：容器内出现 `NapCat Shell App Loading...`、WebUI 返回 200、QQ 进程是容器 PID1（`docker stop` 1–2 秒完成，登录态可落盘）。
+> 只有想自己改界面 / 挂插件目录时，才需要取消注释 `./napcat:/app/napcat`；镜像里已经内置了这套 Shell。
 
-### 方式 C：自己覆盖界面（改壳 / 二开）
+### 方式 C：覆盖成自己的构建产物（二开）
 
-镜像里的 `/app/napcat` 就是 SHCAP Shell，要换成自己的构建产物：
+改完界面对位覆盖即可：
 
 ```bash
 git clone https://github.com/yuyukj888/shcap.git && cd shcap
@@ -69,199 +90,209 @@ docker cp packages/napcat-shell/dist/napcat.mjs  shcap:/app/napcat/napcat.mjs
 docker restart shcap
 ```
 
-### 3. 登录 WebUI
+---
+
+## 二、第一次使用
+
+### 1. 拿 WebUI Token
 
 ```bash
-docker logs shcap 2>&1 | grep -i token      # 取 WebUI Token
+docker logs shcap 2>&1 | grep -i token
+# [NapCat] [WebUi] WebUi Token: xxxxxxxxxxxx
 ```
 
-浏览器打开 `http://服务器IP:6099/webui`，输入 Token 登录；
-QQ 未登录时打开 `基础信息`，用手机 QQ 扫二维码登录。
+### 2. 登录面板
 
-### 4. 配置 OneBot（连 AstrBot / NoneBot / 云崽 等）
+浏览器打开 `http://服务器IP:6099/webui`，输入上面的 Token。
 
-`网络配置` 中新增：
-- **WebSocket 服务端**：`ws://服务器IP:3001`（默认）
-- 或 **HTTP 服务端** + **HTTP 上报**
+### 3. 登录 QQ
+
+QQ 未登录时面板会自动跳到登录页：
+
+- **扫码登录**：手机 QQ 扫面板上的二维码
+- 若提示「新设备验证」，按手机提示完成一次即可（设备名固定后不会再反复要求）
+
+登录成功后面板「基础信息」会显示 QQ 号与昵称，日志出现 `[Core] [Login] 登录成功`。
+
+### 4. 接上你的机器人框架
+
+「网络配置」→ 新增：
+
+| 类型 | 地址 |
+|---|---|
+| WebSocket 服务端（给 AstrBot / NoneBot / 云崽 连） | `ws://服务器IP:3001` |
+| 或 HTTP 服务端 + HTTP 上报 | 按框架要求填 |
 
 连接成功后日志出现 `OneBot11 适配器初始化完成`、`[OneBot] [HTTP Server Adapter] Start On 0.0.0.0:3001`。
 
 ---
 
-## 二、源码构建（本地开发）
+## 三、重启后保持登录
 
-```bash
-# 环境：Node.js >= 22，pnpm（corepack enable 或 npm i -g pnpm）
-pnpm install
-pnpm build:webui     # 构建 WebUI 前端 → packages/napcat-webui-frontend/dist
-pnpm build:shell     # 打包壳 + 前端 → packages/napcat-shell/dist
-```
+这一版的容器**重启不用重新扫码**，靠三件事配合：
 
-产物结构：
+1. **固定主机名**（`hostname`）：QQ 认设备名，容器 ID 一变就是「新设备」
+2. **优雅退出**：镜像里的 `/app/entrypoint.sh` 末尾是 `exec gosu napcat /opt/QQ/qq …`，
+   让 QQ 成为容器 PID1，`docker stop` 的 SIGTERM 能直达 QQ，它才有机会把登录态写盘
+3. **快速登录票据**：登录态落在 `/app/.config/QQ` 卷里，重启后自动快速登录
 
-```
-packages/napcat-shell/dist/
-├── napcat.mjs        # 主程序
-├── static/           # WebUI 静态资源
-├── worker/ native/   # 运行依赖
-├── loadNapCat.js
-├── package.json
-└── qqnt.json
-```
+实测：`docker stop` 从 61 秒（超时强杀）降到 1–2 秒；连续 `stop/start` 与 `compose up --force-recreate`
+都是「正在快速登录 → 成功」，不再弹验证。
 
-Linux 服务器上可直接把 `dist/` 同步到容器的 `/app/napcat/`（保留 `config/`、`plugins/`）。
+> 边界：断电、OOM、`docker kill` 这类非优雅退出，票据仍可能没落盘，需要重新验证一次。
+> 上游镜像若更新了 entrypoint，要用仓库里的 `deploy/patches/entrypoint.sh` 重新覆盖。
 
 ---
 
-## 三、邮件告警（推荐用 WebUI 配置）
+## 四、邮件告警
 
-### 方式 A：WebUI 内配置（推荐，v1.0.1 起内置）
+面板「系统配置 → 邮件通知」里填 SMTP 即可，发信由内置看门狗负责（开机启动，不依赖打开面板）。
 
-登录 WebUI → **系统配置 → 邮件通知**，填写 SMTP 服务器 / 端口 / 账号 / 授权码 / 收件人，
-打开「启用邮件服务」，点「发送测试邮件」确认能收到即可。
+### 会发什么
 
-- 配置保存在 `config/mail.json`，密码回显为 `******`，留空表示不修改；
-- 内置后台看门狗每 60 秒检测一次 QQ 在线状态，状态一变就发信；上次状态记在 `config/mail_state.json`，
-  进程重启后仍能正确判断「恢复上线」，不会像旧版那样把重启后的第一次恢复吞掉；
-- 邮件是响应式 HTML（深色模式、手机/电脑自适应），带时间线、最近日志与可点的面板入口；
-  「发送测试邮件」发的就是这封模板，可直接预览效果；
-- 支持 SSL 直连（465）与 STARTTLS（587）两种方式。
+| 事件 | 触发条件 |
+|---|---|
+| 掉线提醒 | 登录态从「在线」变成「离线」 |
+| 恢复通知 | 登录态从「离线」变回「在线」 |
+| 发送测试邮件 | 手动点按钮，发一封真实样式的预览 |
 
-### 方式 B：外部脚本（旧方案，仍需 cron）
+邮件是响应式 HTML：状态色带 + 关键指标 + 事件经过 + 最近日志 + 命令注解 + 一键打开面板，
+手机上单列、电脑上留白，深色模式也适配。
 
-登录失败、需要验证、掉线、二维码登录时自动发邮件：
+### 配置项
 
-```bash
-mkdir -p /opt/shcap/shcap-notify
-# 将仓库 scripts/shcap-notify 下的 monitor.py / config.json 放入该目录
-vi /opt/shcap/shcap-notify/config.json    # 填 SMTP 账号、授权码、收件人
-crontab -e
-*/2 * * * * cd /opt/shcap/shcap-notify && /usr/bin/python3 monitor.py >/dev/null 2>&1
-```
+| 字段 | 说明 |
+|---|---|
+| SMTP 服务器 / 端口 | 如 `smtp.exmail.qq.com` / `465` |
+| SSL 直连 | 465 端口要打开；587 用 STARTTLS 时关闭 |
+| 邮箱账号 / 密码授权码 | 授权码不是登录密码 |
+| 发件人 / 收件人 | 收件人多个用逗号分隔 |
 
-`config.json` 关键字段：
+### 自定义模板（可选）
+
+配置目录下的 `config/mail_tpl.json` 支持热加载，改完下一封信就生效，**不用重启容器**：
 
 ```json
 {
-  "enabled": true,
-  "smtp": { "host": "smtp.qq.com", "port": 465, "ssl": true,
-            "user": "你的邮箱", "password": "SMTP授权码", "from": "你的邮箱" },
-  "to": ["收件邮箱"],
-  "events": { "login_fail": true, "need_verify": true, "offline": true, "qr_login": false }
+  "offline":   "<html>… %%TIME%% %%UIN%% %%NICK%% %%PANEL%% %%HOST%% …</html>",
+  "recovered": "<html>…</html>"
 }
 ```
 
-> 说明：内置邮件通知当前覆盖「掉线与恢复」两类事件；登录失败 / 需人工验证的细粒度事件仍建议配合方式 B。
+占位符：`%%TIME%%` 时间、`%%UIN%%` QQ 号、`%%NICK%%` 昵称、`%%PANEL%%` 面板地址、
+`%%HOST%%` 服务器地址、`%%MAILFROM%%`、`%%MAILTO%%`。
+镜像内的 `napcat.mjs` 已内联一份默认模板，删掉 `mail_tpl.json` 也能正常发信。
+
+### 排错
+
+- 状态文件：`config/mail_state.json`（上次在线状态，进程重启不丢基线）
+- 日志关键字：`[SHCAP] 邮件已发送`、`[SHCAP] 邮件发送失败（主题）: 原因`
+- 一直收不到：先点「发送测试邮件」，报错会直接写在面板与容器日志里
 
 ---
 
-## 三点六、重启后保持登录（v1.0.5）
+## 五、目录与数据
 
-Docker 重建容器后会丢掉登录态，常见于改配置 / 升级镜像时。三条一起做才有效：
+```
+deploy/
+  docker-compose.yml      # 推荐部署方式（固定主机名 + 优雅停止 + 数据卷）
+  .env.example            # ACCOUNT / NAPCAT_QUICK_PASSWORD
+  Dockerfile              # 官方镜像构建
+  patches/entrypoint.sh   # 优雅退出补丁（QQ 成为 PID1）
+packages/                 # SHCAP 源码（shell / webui / framework / adapter …）
+```
 
-1. **固定主机名**——Docker 默认把容器 ID 当 hostname，QQ 端会认为换了设备，频繁要求新设备验证：
+容器内重要路径：
 
-   ```yaml
-   hostname: "SHCAP的电脑"
-   ```
-
-2. **给 QQ 留出退出落盘时间**——`docker stop` 默认 10 秒就 SIGKILL，票据没写回卷，下次启动只能重新验证：
-
-   ```yaml
-   stop_grace_period: 60s
-   ```
-
-3. **让 QQ 进程直接收到 SIGTERM**——镜像里 `entrypoint.sh` 用 `gosu ... qq` 前台启动，QQ 是 bash 的子进程，
-   SIGTERM 落在 bash 上，QQ 收不到。把结尾两行改成 `exec gosu napcat /opt/QQ/qq ...` 即可（`docker-compose.yml`
-   里挂载改过的 `entrypoint.sh`，或构建自有镜像时替换）。
-
-可选：在 `.env` 里配置 `NAPCAT_QUICK_PASSWORD`（QQ 登录密码），快速登录票据失效时可直接密码回退重登。
+| 路径 | 内容 |
+|---|---|
+| `/app/napcat/config` | 配置：webui.json、onebot11_*.json、mail.json、mail_tpl.json、mail_state.json |
+| `/app/.config/QQ` | QQ 登录态与缓存（重启免验证靠它） |
+| `/app/napcat` | SHCAP Shell（napcat.mjs + static + node_modules） |
 
 ---
 
-## 三点七、QQ 版本与 3.2.35 镜像
+## 六、常见问题
 
-"系统信息"里的 QQ 版本读的是容器内 `/opt/QQ/resources/app/package.json`，**不是运行时真实版本**。
-上游基础镜像（`napcat-docker:latest`）里这个文件停在 `3.2.30-50969`，而运行时版本来自 `/opt/QQ/version.json`，
-实际是 `3.2.35-54395`——所以"关于"页显示 3.2.30，日志里的偏移表却按 3.2.35 报。
+**Q：为什么掉线了没收到邮件？**
+v1.0.5 之前的告警有两个坑：一是检测只匹配中文「已离线」等措辞，而真实掉线日志是
+`[Login] Login Error,ErrType: 1 ErrCode: 3`；二是只在打开面板邮件页时才启动看门狗。
+现在看门狗随进程启动，恢复也会发信。升级后仍收不到，先看 [排错](#排错)。
 
-想让"关于"页也显示 3.2.35，用 `deploy/Dockerfile.qq335` 自建镜像：
+**Q：被踢下线（KickedOffLine）是什么原因？**
+日志 `[KickedOffLine] [下线通知] 你的账号当前登录已失效` 是 **QQ 服务端**主动踢的
+（异地登录、手机端操作、风控），不是网络抖动。重新登录即可；这种事单靠重连救不回来。
 
-1. 把 `linuxqq_3.2.35-54395_amd64.deb` 放进 `deploy/`；
-2. 在 `deploy/docker-compose.yml` 里把 `image:` 换成注释里的 `build:`（context 为 `.`，dockerfile 为 `Dockerfile.qq335`）；
-3. `docker compose build && docker compose up -d`。
+**Q：设备名怎么变了？**
+Docker 默认拿容器 ID 当 hostname。本仓库 compose 已固定为 `SHCAP的电脑`；
+历史遗留的 12 位 ID 设备记录要去手机 QQ「登录设备管理」里删掉。
 
-关键点：`dpkg -i` 会覆盖 `package.json` 的 `main`，必须改回 `./loadNapCat.js`，否则容器只有 QQ 进程、
-没有 NapCat / OneBot（Dockerfile 里已经包含这一步）。
+**Q：重启后还是要验证码？**
+先确认 `docker stop` 是 1–2 秒完成（而不是等 60 秒超时）。超时说明 entrypoint 没执行到 `exec`，
+用 `deploy/patches/entrypoint.sh` 覆盖 `/app/entrypoint.sh` 后重建。另可配 `NAPCAT_QUICK_PASSWORD` 兜底。
 
-> 日志出现 `[Core] [Packet] PacketBackend 不支持当前QQ版本架构：3.2.35-54395-x64` 属已知现象：
-> NapCat 内核偏移表未覆盖该构建号，基础收发一般仍正常，但这一组合不在官方支持范围内。
+**Q：怎么升级？**
+```bash
+docker pull ghcr.io/yuyukj888/shcap:latest
+docker compose up -d      # config 与 qq 卷不动，登录态保留
+```
+跨大版本前建议备份 `./config` 与 `./qq`。
 
----
+### 打包自己的 QQ 版本
 
-
-## 三点五、插件商店说明
-
-上游 NapCat 仓库（`NapNeko/NapCatQQ`）已删除，其插件索引 `napcat-plugin-index` 随之失效，
-在线插件商店无法再拉到有效列表。SHCAP 因此**下线了插件商店入口**：请从 GitHub 手动下载插件
-Release 包（zip），在 **插件管理 → 安装插件** 中上传安装。
-
----
-
-## 四、目录与端口
-
-| 路径 | 说明 |
-| --- | --- |
-| `/app/napcat/config` | 全局配置（`webui.json`、`onebot11_<QQ>.json` 等） |
-| `/app/.config/QQ` | QQ 账号数据、登录态 |
-| `/app/napcat/plugins` | 插件目录 |
-| `/app/napcat/static` | WebUI 静态资源 |
-
-| 端口 | 用途 |
-| --- | --- |
-| 6099 | WebUI |
-| 3001 | OneBot HTTP / WebSocket |
+`deploy/Dockerfile.qq335` 是可复现的参考：在基础镜像上 `dpkg -i` 指定 QQ 包后，
+必须把 `/opt/QQ/resources/app/package.json` 的 `main` 改回 `./loadNapCat.js`，
+否则 NapCat 不会被注入。
 
 ---
 
-## 四点五、发布包说明（GitHub Releases）
+## 七、源码构建（本地开发）
 
-每个 Release 页面包含三类文件：
+```bash
+corepack enable
+pnpm install
 
-| 文件 | 用途 |
-| --- | --- |
-| `Source code (zip / tar.gz)` | GitHub 自动附带的**完整源代码**，可直接编译 |
-| `NapCat.Shell.zip` | **WebUI 版本管理 / 手动更新**用的程序包（`napcat.mjs`、`static/`、`worker/`、`native/`、`loadNapCat.js`、`package.json`、`qqnt.json`；**不含 `config/`、`plugins/`**） |
-| `shcap-docker.tar.gz` | **Docker 一键部署整包**：已构建好的 SHCAP Shell + `docker-compose.yml` + `.env.example` + `README.md`，解压改 `ACCOUNT` 后 `docker compose up -d` 即可 |
+pnpm build:webui     # 前端（WebUI）
+pnpm build:shell     # Shell（napcat.mjs）
+pnpm typecheck
+```
 
-### 更新行为（不会覆盖设置）
-
-WebUI →「基础信息」→ 点版本号 → 版本管理 → 选择 `v1.0.2` → 更新，然后 `docker restart shcap`。
-
-- 更新只替换程序文件；发布包**不含 `config/`**，因此 `config/webui.json`（WebUI 令牌/主题）、`config/mail.json`（邮件配置）、`config/onebot11_*.json` 等全部保留；
-- 实测：更新前后 `webui.json` / `mail.json` 的 md5 不变，`docker logs` 可见 `Preserving existing user config: config/napcat.json` 与 `更新完成`；
-- 下载走 GitHub 加速镜像（`gh-proxy.com` 等），服务器在国内也可更新。
+产物在 `packages/napcat-shell/dist`，按 [方式 C](#方式-c覆盖成自己的构建产物二开) 覆盖到容器即可。
 
 ---
 
-## 五、常见问题
+## 八、联系与赞助
 
-**Q：WebUI 打不开？**
-检查 `docker ps` 端口映射、防火墙放行 6099；`docker logs shcap` 是否出现 `WebUI Token`。
+<div align="center">
 
-**Q：验证码 / 扫码失败？**
-容器内带 Xvfb 虚拟显示，首次登录需扫码；账号风控请更换网络或稍后再试。
+### 有问题、想定制、想进群交流
 
-**Q：更新后界面回退成原版？**
-`static/` 是挂载或拷贝的产物，重新执行「方式 C」覆盖即可。
+[**点击加我 QQ 好友**](https://qm.qq.com/q/PckmQNeBau)　·　[**点击加入 QQ 群【【Fivem】SH工作室】**](https://qm.qq.com/q/j6oy4NvXbi)
 
-**Q：能升级到 QQ 3.2.35 吗？**
-暂不支持（注入点不兼容），请使用 3.2.30 客户端；后续版本适配中。
+</div>
+
+**SH 工作室业务范围**：Fivem 插件定制 · 开发 / 出售 / 成品端 · 网站搭建
+营业时间：周一至周五 10:00–22:00
+
+如果 SHCAP 帮到了你，欢迎扫码赞助，一分也是爱：
+
+<div align="center">
+
+<img src="docs/images/sponsor.png" alt="SH 工作室赞助码" width="360">
+
+<sub>支付宝 / 微信 均可</sub>
+
+</div>
 
 ---
 
-## 六、致谢与声明
+## 鸣谢
 
-- 项目基于 **[NapNeko/NapCatQQ](https://github.com/NapNeko/NapCatQQ)** 4.18.42 派生，遵循上游开源许可；
-- OneBot 11 协议实现参考原 NapCat 代码，插件生态完全兼容；
-- 本项目仅用于**个人学习与自建机器人**，请遵守 QQ 用户协议与所在地法律法规，勿用于商业滥用。
+- [NapCatQQ](https://github.com/NapNeko/NapCatQQ)：本项目的基础与长期参考
+- [OneBot 11](https://11.onebot.dev/)：协议标准
+- 所有 issue、PR 与群里帮忙测试的朋友
+
+## 许可
+
+继承上游 NapCat 的许可条款，详见 [LICENSE](LICENSE)。使用本项目造成的任何后果由使用者自行承担，
+请遵守腾讯 QQ 用户协议与当地法律法规，**不要用于任何违法用途**。
