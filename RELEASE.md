@@ -48,12 +48,15 @@ unzip -l NapCat.Shell.zip | grep -c node_modules/    # 必须 > 500
 
 ## 4. 脱敏审计（0 命中才能发）
 
+真实敏感串**只放本地私有文件**（`PATTERNS_FILE`，一行一个），不进仓库、不进 Release 正文：
+
 ```bash
-unzip -q NapCat.Shell.zip -d /tmp/chk
-grep -rl -E "<服务器IP>|<QQ号>|<昵称>|<发件邮箱>|<收件邮箱>|<SMTP授权码>|<OneBot token>|<WebUI token>|<QQ密码>" /tmp/chk
+# ~/.shcap-private-patterns 里写：服务器IP / QQ号 / 昵称 / 收发邮箱 / SMTP授权码 / 两个 token / QQ密码
+PATTERNS_FILE=~/.shcap-private-patterns ./scripts/preflight-audit.sh NapCat.Shell.zip shcap-docker-x.y.z.tar.gz
 ```
 
-另外检查：`static/assets/` 里没有 `*.bak-*`、`*.orig-*` 调试文件。
+脚本会解包后逐个文件扫描，命中即退出 1，同时检查 `*.bak-*`、`*.orig-*`、`*.log` 调试残留。
+审计不过**禁止上传**。
 
 ## 5. docker 整包 tar.gz
 
