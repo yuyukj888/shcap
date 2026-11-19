@@ -1,0 +1,22 @@
+# 可选镜像：把基础镜像里的 QQ 换成 3.2.35-54395（"关于"页会显示 3.2.35）
+#
+# 用法：
+#   1) 自备 linuxqq_3.2.35-54395_amd64.deb（腾讯官网 / 你的旧镜像），放到 deploy/ 目录
+#   2) 在 deploy/docker-compose.yml 里把 image 换成 build（该文件里已有注释掉的两行）
+#   3) docker compose build && docker compose up -d
+#
+# 注意：换 QQ 版本后需自行确认 NapCat 支持该版本。内核偏移表未覆盖时，日志会出现
+#       "PacketBackend 不支持当前QQ版本架构"，基础收发通常仍可用，但属于非官方支持组合。
+FROM docker.1ms.run/mlikiowa/napcat-docker:latest
+
+ARG QQ_DEB=linuxqq_3.2.35-54395_amd64.deb
+COPY ${QQ_DEB} /tmp/linuxqq.deb
+
+# 安装新版 QQ 后 dpkg 会把 package.json 的入口换回官方启动器（application.asar），
+# 必须改回 loadNapCat.js，否则容器起来只有 QQ 进程、没有 NapCat / OneBot。
+RUN dpkg -i /tmp/linuxqq.deb && rm -f /tmp/linuxqq.deb \
+ && sed -i 's#"main": "./application.asar/app_launcher/index.js"#"main": "./loadNapCat.js"#' /opt/QQ/resources/app/package.json \
+ && grep -n '"main"' /opt/QQ/resources/app/package.json
+
+# 优雅退出补丁：让 QQ 成为 PID1，docker stop 时直接收到 SIGTERM（见 README「重启后保持登录」）
+COPY patches/entrypoint.sh /app/entrypoint.sh

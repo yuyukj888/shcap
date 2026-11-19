@@ -194,6 +194,27 @@ Docker 重建容器后会丢掉登录态，常见于改配置 / 升级镜像时�
 
 ---
 
+## 三点七、QQ 版本与 3.2.35 镜像
+
+"系统信息"里的 QQ 版本读的是容器内 `/opt/QQ/resources/app/package.json`，**不是运行时真实版本**。
+上游基础镜像（`napcat-docker:latest`）里这个文件停在 `3.2.30-50969`，而运行时版本来自 `/opt/QQ/version.json`，
+实际是 `3.2.35-54395`——所以"关于"页显示 3.2.30，日志里的偏移表却按 3.2.35 报。
+
+想让"关于"页也显示 3.2.35，用 `deploy/Dockerfile.qq335` 自建镜像：
+
+1. 把 `linuxqq_3.2.35-54395_amd64.deb` 放进 `deploy/`；
+2. 在 `deploy/docker-compose.yml` 里把 `image:` 换成注释里的 `build:`（context 为 `.`，dockerfile 为 `Dockerfile.qq335`）；
+3. `docker compose build && docker compose up -d`。
+
+关键点：`dpkg -i` 会覆盖 `package.json` 的 `main`，必须改回 `./loadNapCat.js`，否则容器只有 QQ 进程、
+没有 NapCat / OneBot（Dockerfile 里已经包含这一步）。
+
+> 日志出现 `[Core] [Packet] PacketBackend 不支持当前QQ版本架构：3.2.35-54395-x64` 属已知现象：
+> NapCat 内核偏移表未覆盖该构建号，基础收发一般仍正常，但这一组合不在官方支持范围内。
+
+---
+
+
 ## 三点五、插件商店说明
 
 上游 NapCat 仓库（`NapNeko/NapCatQQ`）已删除，其插件索引 `napcat-plugin-index` 随之失效，

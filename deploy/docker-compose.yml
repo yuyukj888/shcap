@@ -1,6 +1,11 @@
 services:
   shcap:
+    # 默认用上游基础镜像即可：它的运行时 QQ 已是 3.2.35，只是"关于"页读 package.json 显示 3.2.30
+    # 需要"关于"页也显示 3.2.35：自备 deb 后用 deploy/Dockerfile.qq335 构建（见 README「QQ 版本」）
     image: docker.1ms.run/mlikiowa/napcat-docker:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.qq335
     container_name: shcap
     restart: unless-stopped
     # 固定主机名：Docker 默认用容器 ID 当 hostname，重建后 QQ 会当成新设备，反复要求新设备验证
