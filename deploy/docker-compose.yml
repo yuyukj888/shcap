@@ -1,8 +1,8 @@
 services:
   shcap:
-    # 【过渡】官方镜像 ghcr.io/yuyukj888/shcap 正在发布中，暂时仍用上游运行时 + 下面挂载 SHCAP Shell
-    # 发布完成后这里会换成：image: ghcr.io/yuyukj888/shcap:1.0.5
-    image: docker.1ms.run/mlikiowa/napcat-docker:latest
+    # SHCAP 官方镜像：已内置 SHCAP 界面 + HTML 邮件告警 + 优雅退出补丁，pull 下来直接可用
+    # 国内加速：ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5
+    image: ghcr.io/yuyukj888/shcap:1.0.5
     container_name: shcap
     restart: unless-stopped
     # 固定主机名：Docker 默认用容器 ID 当 hostname，重建后 QQ 会当成新设备，反复要求新设备验证
