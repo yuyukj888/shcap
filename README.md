@@ -52,6 +52,10 @@ docker compose up -d
 
 > 国内拉不动 ghcr.io 时换成南京大学镜像源：`ghcr.nju.edu.cn/yuyukj888/shcap:1.0.5`。
 
+镜像本身：约 1.57 GB，已内置 `node_modules`（容器里没有 node/npm，运行时依赖只能随镜像带），
+digest `sha256:ca49a492028c7ed562bc217919dc5cb45fe53612c3ac820f85ca26de7a074d7c`。
+已实测：容器内出现 `NapCat Shell App Loading...`、WebUI 返回 200、QQ 进程是容器 PID1（`docker stop` 1–2 秒完成，登录态可落盘）。
+
 ### 方式 C：自己覆盖界面（改壳 / 二开）
 
 镜像里的 `/app/napcat` 就是 SHCAP Shell，要换成自己的构建产物：
