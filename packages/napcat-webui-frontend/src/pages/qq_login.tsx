@@ -267,6 +267,11 @@ export default function QQLoginPage () {
     try {
       const data = await QQManager.getQQQuickLoginListNew();
       setQQList(data);
+      // 被踢下线后快速登录凭证会失效，列表为空。此时若仍停留在
+      // 「快速登录」标签页，用户只会看到一个空下拉框，所以自动切到密码登录。
+      if (!Array.isArray(data) || data.length === 0) {
+        setActiveTab((current) => (current === 'shortcut' ? 'password' : current));
+      }
     } catch (error) {
       const msg = (error as Error).message;
       toast.error(`获取QQ列表失败: ${msg}`);

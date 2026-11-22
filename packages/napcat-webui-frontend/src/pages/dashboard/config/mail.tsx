@@ -32,6 +32,8 @@ const MailConfigCard = () => {
       to: '',
       notifyOffline: true,
       notifyRecover: true,
+      notifyContainerDown: true,
+      notifyUnreachable: true,
     },
   });
 
@@ -171,7 +173,7 @@ const MailConfigCard = () => {
             <Input {...field} label='收件人' placeholder='a@example.com,b@example.com' description='多个收件人用逗号或分号分隔' />
           )}
         />
-        <div className='flex flex-col gap-4 md:flex-row'>
+        <div className='flex flex-wrap gap-4'>
           <Controller
             control={control}
             name='notifyOffline'
@@ -195,6 +197,32 @@ const MailConfigCard = () => {
                 onValueChange={field.onChange}
                 label='恢复提醒'
                 description='QQ 重新上线时发邮件'
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name='notifyContainerDown'
+            render={({ field }) => (
+              <SwitchCard
+                {...field}
+                value={field.value}
+                onValueChange={field.onChange}
+                label='容器停止'
+                description='napcat 容器未运行时发邮件'
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name='notifyUnreachable'
+            render={({ field }) => (
+              <SwitchCard
+                {...field}
+                value={field.value}
+                onValueChange={field.onChange}
+                label='接口无响应'
+                description='OneBot 接口连续失败时发邮件'
               />
             )}
           />

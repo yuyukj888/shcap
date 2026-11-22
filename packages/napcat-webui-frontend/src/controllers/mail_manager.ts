@@ -11,6 +11,10 @@ export interface MailConfigData {
   to: string;
   notifyOffline: boolean;
   notifyRecover: boolean;
+  /** 容器停止（运行 napcat 巡检脚本时生效） */
+  notifyContainerDown?: boolean;
+  /** OneBot 接口连续失败（运行 napcat 巡检脚本时生效） */
+  notifyUnreachable?: boolean;
   /** 已废弃：看门狗不再按冷却窗口压制提醒 */
   cooldownMinutes?: number;
 }

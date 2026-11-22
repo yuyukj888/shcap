@@ -36,8 +36,17 @@ interface PasswordLoginProps {
   onNewDeviceCancel?: () => void;
 }
 
+/** 记住上一次输入的 QQ 号：快速登录凭证失效时也能一键填回 */
+const LAST_UIN_KEY = 'shcap_last_uin';
+
 const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit, onNewDeviceVerified, isLoading, qqList, captchaState, captchaVerifying, newDeviceState, onCaptchaCancel, onNewDeviceCancel }) => {
-  const [uin, setUin] = useState('');
+  const [uin, setUin] = useState(() => {
+    try {
+      return localStorage.getItem(LAST_UIN_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
 
   const handleSubmit = () => {
@@ -48,6 +57,11 @@ const PasswordLogin: React.FC<PasswordLoginProps> = ({ onSubmit, onCaptchaSubmit
     if (!password) {
       toast.error('请输入密码');
       return;
+    }
+    try {
+      localStorage.setItem(LAST_UIN_KEY, uin);
+    } catch {
+      // 隐私模式下 localStorage 不可用，忽略即可
     }
     onSubmit(uin, password);
   };

@@ -19,6 +19,10 @@ export interface MailConfig {
   to: string;
   notifyOffline: boolean;
   notifyRecover: boolean;
+  /** 容器停止时是否提醒（由运维巡检脚本读取） */
+  notifyContainerDown?: boolean;
+  /** OneBot 接口连续失败时是否提醒（由运维巡检脚本读取） */
+  notifyUnreachable?: boolean;
   /** 已废弃：看门狗不再用冷却窗口压制提醒，保留字段只为兼容旧配置文件 */
   cooldownMinutes?: number;
 }
@@ -34,6 +38,8 @@ const DEFAULT_CONFIG: MailConfig = {
   to: '',
   notifyOffline: true,
   notifyRecover: true,
+  notifyContainerDown: true,
+  notifyUnreachable: true,
 };
 
 function configFile (): string {
