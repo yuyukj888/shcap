@@ -340,8 +340,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // ------------挂载路由------------
   // 挂载静态路由（前端），路径为 /webui
+  // 前端静态资源不做强缓存：SHCAP 会原地热更新 dist 文件，
+  // 若命中 max-age 缓存用户会继续看到旧界面（新增开关/修复看不到）。
   app.use('/webui', express.static(pathWrapper.staticPath, {
-    maxAge: '1d',
+    maxAge: 0,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-cache');
+    },
   }));
 
   // 插件内存静态资源路由（不需要鉴权）
